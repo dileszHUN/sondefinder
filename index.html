@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0d192b">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>SondeFinder 2.3 – online rádiószonda-kereső</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='48'%3E🎈%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    :root {font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark;--bg:#0b1423;--panel:#132238;--edge:#2a405a;--text:#edf5ff;--muted:#afc2d7;--accent:#6fe2c2;--warn:#ffd68c;--danger:#ffabb7}
+    [hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;color:var(--text);background:linear-gradient(140deg,#102740 0%,var(--bg) 45%);min-height:100vh}
+    .wrap{max-width:1250px;padding:23px 18px 38px;margin:0 auto}header{display:flex;gap:11px;align-items:center;margin-bottom:18px}
+    .brand-icon{background:#16493f;border-radius:14px;display:grid;place-items:center;width:47px;height:47px;font-size:26px}
+    h1{font-size:24px;letter-spacing:-.7px;margin:0}header p{font-size:12px;color:var(--muted);margin:1px 0 0}
+    .grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}.box{background:var(--panel);border:1px solid var(--edge);border-radius:16px;overflow:hidden}
+    .controls{padding:18px}.field{margin:0 0 15px}.field label{font-size:12px;color:var(--muted);font-weight:650;display:block;margin:0 0 6px}
+    input,select,button{font:inherit}input,select{width:100%;padding:10px;border-radius:9px;border:1px solid #3b5068;background:#0c1a2d;color:var(--text)}
+    input:focus,select:focus{outline:2px solid #429e91;outline-offset:1px}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    button{border:1px solid #48617b;background:#203650;color:#eef8ff;border-radius:9px;padding:10px 12px;font-weight:650;cursor:pointer}
+    button:hover{filter:brightness(1.13)}button:disabled{opacity:.6;cursor:wait}.primary{background:#65d6b5;color:#092329;border-color:#65d6b5}
+    .buttons{display:flex;gap:8px}.buttons>button{flex:1;font-size:13px}.find{width:100%;padding:13px;font-size:15px}
+    small,.hint{color:var(--muted);font-size:12px;line-height:1.55}.hint{margin:7px 0 0}.note{font-size:12px;line-height:1.6;background:#1e3144;border:1px solid #456079;border-radius:10px;padding:10px 12px;margin:0 0 15px}
+    .status{font-size:13px;line-height:1.5;padding:12px 14px;border-radius:10px;background:#1a3042;border:1px solid #3d5b72;margin:12px 0 0;white-space:pre-wrap}
+    .status.error{border-color:#96515b;color:#ffd0d5;background:#42242c}.status.warning{color:var(--warn);border-color:#80673c}.status.good{color:#a4f0d7;border-color:#428574}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 16px}.topline strong{font-size:14px}.topline small{display:block;margin-top:4px}
+    #map{height:470px;background:#081c35}.map-wrap{overflow:hidden}.leaflet-container{font:inherit}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#183149;color:#f1f8ff}.leaflet-popup-content a{color:#91e3d7}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.stat{padding:14px 16px}.stat span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.stat b{font-size:24px}
+    .result-title{font-size:15px;margin:0}.items{max-height:620px;overflow:auto}.empty{text-align:center;padding:30px 15px;font-size:13px;color:var(--muted)}
+    .item{border-top:1px solid var(--edge);padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:12px}.item h3{margin:0 0 6px;font-size:15px;overflow-wrap:anywhere}.distance{font-size:21px;font-weight:800;color:var(--accent);white-space:nowrap}
+    .meta{font-size:12px;color:var(--muted);line-height:1.65}.pill{display:inline-block;font-size:10px;border:1px solid #5c8091;border-radius:20px;padding:2px 7px;margin-left:5px;color:#b5e9df;font-weight:500}
+    .pill.warn{color:var(--warn);border-color:#967543}.pill.found{color:#c6d0da;border-color:#748292}
+    .links{display:flex;gap:12px;margin-top:8px;font-size:12px;flex-wrap:wrap}a{color:#8ce9ce;text-decoration:none}a:hover{text-decoration:underline}
+    .alert{margin:0 0 15px;padding:13px 16px;border:1px solid #eeb976;background:#46301b;color:#ffe1ba;border-radius:12px;font-size:13px;line-height:1.55} .alert strong{display:block;font-size:14px;margin-bottom:2px} .alert a{color:#ffe6b5;text-decoration:underline}
+    footer{margin:13px 0;color:var(--muted);font-size:12px;line-height:1.5}.leaflet-control-attribution{font-size:10px!important}.map-message{padding:9px 14px;background:#362a22;color:#ffdeae;border-top:1px solid #7d674f;font-size:12px;line-height:1.5}
+    @media(max-width:850px){.grid{grid-template-columns:1fr}.controls{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.controls>.wide,.controls>.note,.controls>.find,.controls>#status{grid-column:1/-1}}
+    @media(max-width:560px){.wrap{padding:13px 10px 30px}h1{font-size:21px}.grid{gap:10px}.controls{display:block;padding:14px}.stats{gap:6px}.stat{padding:12px 9px}.stat b{font-size:20px}.stat span{font-size:10px}#map{height:340px}.item{padding:12px}.distance{font-size:17px}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header><div class="brand-icon">🎈</div><div><h1>SondeFinder</h1><p>2.3 · Online szondakereső · SondeHub API</p></div></header>
+  <div id="localAlert" class="alert" hidden><strong>⚠️ Helyi fájlként nyitottad meg az oldalt</strong>A SondeHub-lekérdezéshez webszerverről nyisd meg a fájlt (HTTP is jó). A böngészős GPS-hez viszont HTTPS szükséges. A <code>file://</code> cím nem alkalmas a megbízható online teszteléshez.</div>
+  <div class="grid">
+    <section class="box controls" aria-label="Keresési beállítások">
+      <div class="field wide"><label>Helyzet</label><div class="buttons"><button id="gps" type="button">📍 Saját helyzet</button><button id="tata" type="button">Tata</button></div><p class="hint">GPS csak HTTPS-es oldalon vagy localhoston érhető el.</p></div>
+      <div class="two wide">
+        <div class="field"><label for="lat">Szélesség</label><input id="lat" type="number" value="47.6513" min="-90" max="90" step="any"></div>
+        <div class="field"><label for="lon">Hosszúság</label><input id="lon" type="number" value="18.3183" min="-180" max="180" step="any"></div>
+      </div>
+      <div class="field"><label for="radius">Keresési sugár</label><select id="radius"><option value="10">10 km</option><option value="25">25 km</option><option value="50" selected>50 km</option><option value="75">75 km</option><option value="100">100 km</option></select></div>
+      <div class="field"><label for="period">Időszak</label><select id="period"><option value="1">Utolsó 1 nap</option><option value="3" selected>Utolsó 3 nap</option><option value="7">Utolsó 7 nap</option><option value="custom">Egyéni dátum (max. 7 napra vissza)</option></select><p class="hint">Az élő SondeHub API nem teljes többéves történeti archívum; a régi dátumokhoz más adatforrás kell.</p></div>
+      <div class="two wide" id="dateRow" hidden>
+        <div class="field"><label for="start">Kezdőnap</label><input id="start" type="date"></div>
+        <div class="field"><label for="end">Zárónap</label><input id="end" type="date"></div>
+      </div>
+      <div class="field"><label for="maxAlt">Utolsó mért magasság</label><select id="maxAlt"><option value="1500" selected>Legfeljebb 1500 m</option><option value="5000">Legfeljebb 5000 m</option><option value="999999">Mindegy</option></select></div>
+      <div class="field wide"><label style="display:flex;gap:8px;align-items:center;color:var(--text);font-weight:500"><input type="checkbox" id="hideFound" checked style="width:auto"> Bejelentetten megtalált szondák elrejtése</label></div>
+      <p class="note wide">ℹ️ Élő SondeHub <code>/sondes</code> API. Legfeljebb 7 napos közelmúlt; a találatok nem teljes történeti archívum. Az utolsó mért hely nem biztos leszállási hely. <a href="https://sondehub.statuspage.io/" target="_blank" rel="noopener">SondeHub szolgáltatásállapot</a>.</p>
+      <button type="button" class="primary find wide" id="search">🔎 Szondák keresése</button>
+      <div id="status" class="status wide" role="status" aria-live="polite">Állítsd be a keresést, majd kattints a gombra.</div>
+    </section>
+    <div>
+      <section class="box map-wrap"><div class="topline"><div><strong>Térkép</strong><small>Utolsó észlelt pozíciók</small></div><small id="updated">–</small></div><div id="map"></div><div id="mapMessage" class="map-message" hidden role="status"></div></section>
+      <div class="stats"><div class="box stat"><span>Észlelt szondák</span><b id="total">–</b></div><div class="box stat"><span>Listában</span><b id="shown">–</b></div><div class="box stat"><span>Megtaláltak</span><b id="recoveredCount">–</b></div></div>
+      <section class="box"><div class="topline"><div><strong class="result-title">Találatok távolság szerint</strong><small id="filterHint">Keresésre vár</small></div></div><div id="list" class="items"><div class="empty">🎈<br>Nincsenek még lekért adatok.</div></div></section>
+      <footer>Adatforrás: <a href="https://sondehub.org" target="_blank" rel="noopener">SondeHub</a> (CC BY-SA 2.0). Térkép: © OpenStreetMap. A bejelentés hiánya nem bizonyítja, hogy a szonda még a terepen van.</footer>
+    </div>
+  </div>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const API = 'https://api.v2.sondehub.org';
+let map, layer, centerMarker, ring, lastRows = [], busy = false, tileFallbackUsed=false;
+const isLocalFile = location.protocol === 'file:';
+function setStatus(message, kind='') { $('status').className = 'status wide' + (kind ? ' '+kind : ''); $('status').textContent = message; }
+function safe(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function dayStr(date) { const d = new Date(date.getTime()-date.getTimezoneOffset()*60000);return d.toISOString().slice(0,10); }
+function number(n) { return n===undefined||n===null||n==='' ? null : (Number.isFinite(Number(n)) ? Number(n) : null); }
+function haversine(a,b,c,d) { const r = Math.PI/180, dl=(d-b)*r, dp=(c-a)*r, t=Math.sin(dp/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dl/2)**2;return 6371*2*Math.asin(Math.min(1,Math.sqrt(t))); }
+function fmtDate(s) {const d=new Date(s);return isNaN(d)?'ismeretlen':d.toLocaleString('hu-HU',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function setCoords(lat,lon) { $('lat').value=lat.toFixed(6);$('lon').value=lon.toFixed(6); drawCenter(lat,lon,Number($('radius').value),true); }
+function drawCenter(lat,lon,rad,fly=false) {
+  if (!map) return;
+  if (centerMarker) map.removeLayer(centerMarker);
+  if (ring) map.removeLayer(ring);
+  centerMarker=L.circleMarker([lat,lon],{radius:8,weight:3,color:'#fff',fillColor:'#3985f4',fillOpacity:1}).addTo(map).bindPopup('Keresési középpont');
+  ring=L.circle([lat,lon],{radius:rad*1000,weight:1.5,color:'#429dda',fillColor:'#449aca',fillOpacity:.06}).addTo(map);
+  if (fly) map.fitBounds(ring.getBounds(),{padding:[18,18],maxZoom:11});
+}
+function setupMap() {
+  if (!window.L) {setMapMessage('A Leaflet térképkönyvtár nem töltődött be.');return;}
+  map=L.map('map',{zoomControl:true}).setView([47.6513,18.3183],9);
+  // Hivatalos OSM csempék: nincs API-kulcs, és a böngésző normál gyorsítótárát használják.
+  // Térképcsempéket kizárólag a megtekintett térképrészhez töltünk le.
+  let tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',
+    maxZoom:19,keepBuffer:2,updateWhenIdle:true
+  }).addTo(map);
+  let osmErrors=0;
+  tiles.on('tileload',()=>{ if (!tileFallbackUsed) setMapMessage(''); });
+  tiles.on('tileerror',()=>{
+    if(++osmErrors>=3 && !tileFallbackUsed){
+      tileFallbackUsed=true;
+      map.removeLayer(tiles);
+      // Egyetlen tartalék térképszolgáltató – a SondeHub adatkérést nem módosítjuk.
+      tiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{
+        attribution:'Tiles &copy; Esri; map data &copy; OpenStreetMap contributors and other providers',maxZoom:18,keepBuffer:2
+      }).addTo(map);
+      setMapMessage('Az OpenStreetMap térképcsempéi nem érhetők el; tartalék Esri térképet használunk.');
+      let esriErrors=0;
+      tiles.on('tileerror',()=>{if(++esriErrors>=3)setMapMessage('A térképszolgáltatók nem elérhetők. Ellenőrizd a hálózati kapcsolatot vagy a böngésző tartalomblokkolását. A szondák listája ettől függetlenül működhet.');});
+    }
+  });
+  window.addEventListener('resize',()=>map.invalidateSize());
+  setTimeout(()=>map.invalidateSize(),250);
+  layer=L.layerGroup().addTo(map);
+  drawCenter(47.6513,18.3183,50,true);
+}
+function setMapMessage(message) {
+  const el=$('mapMessage');
+  el.textContent=message;
+  el.hidden=!message;
+}
+function dateRange() {
+  const now=new Date();
+  if ($('period').value==='custom') {
+    const start=new Date($('start').value+'T00:00:00'),end=new Date($('end').value+'T23:59:59.999');
+    if (!Number.isFinite(+start)||!Number.isFinite(+end)||start>end) throw Error('Válassz érvényes kezdő- és záródátumot.');
+    if (+start>+now) throw Error('A kezdődátum nem lehet a jövőben.');
+    if (+start < +now - 7*86400000) throw Error('A SondeHub élő /sondes API-jából legfeljebb az elmúlt 7 nap kérdezhető le. Régebbi napokat egyetlen élő API-kéréssel nem lehet hitelesen megjeleníteni.');
+    return {start,end};
+  }
+  const days=Number($('period').value);
+  return {start:new Date(+now-days*86400000),end:now};
+}
+async function apiJSON(url) {
+  const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),20000);
+  try {
+    const response=await fetch(url,{method:'GET',signal:controller.signal,cache:'no-store',mode:'cors',credentials:'omit'});
+    const raw=await response.text();
+    if (response.ok && !raw.trim()) return [];
+    if (!response.ok) throw Error('SondeHub HTTP '+response.status+(raw&&raw.length<150&&raw[0]!=='<'?': '+raw.slice(0,120):''));
+    try {return JSON.parse(raw)} catch {throw Error('A SondeHub nem JSON-adatot küldött vissza.');}
+  } catch (error) {
+    if (error.name==='AbortError') throw Error('Időtúllépés a SondeHub lekérdezésekor.');
+    if (error instanceof TypeError) throw Error('A SondeHub API-kérés böngészőből nem volt elérhető (CORS/hálózat). Ellenőrizd, hogy a webszerver webcíméről fut-e az oldal. Ha ott is hibás, a SondeHub kereszt-domain hozzáférése lehet tiltott; ezt egyetlen index.html nem tudja megkerülni.');
+    throw error;
+  } finally {clearTimeout(timer);}
+}
+function parsedTelemetry(data, lat, lon, radius, start, end, maxAlt) {
+  if (!data||typeof data!=='object'||Array.isArray(data)) throw Error('Ismeretlen szondalista-formátumot adott vissza a SondeHub.');
+  const rows=[];
+  for (const [serial,value] of Object.entries(data)) {
+    if (!value || typeof value!=='object') continue;
+    const rec = 'lat' in value ? value : Object.values(value).filter(x=>x&&typeof x==='object'&&'lat' in x&&'lon' in x).sort((a,b)=>Date.parse(b.datetime||b.time_received||0)-Date.parse(a.datetime||a.time_received||0))[0];
+    if (!rec) continue;
+    const a=number(rec.lat), b=number(rec.lon), h=number(rec.alt), when=new Date(rec.datetime||rec.time_received);
+    if (a===null||b===null||Math.abs(a)>90||Math.abs(b)>180||isNaN(+when)) continue;
+    const km=haversine(lat,lon,a,b);
+    if (km>radius||when<start||when>end||(h!==null&&h>maxAlt))continue;
+    rows.push({serial:String(rec.serial||serial),lat:a,lon:b,alt:h,km,datetime:when.toISOString(),type:rec.type||rec.subtype||'',frequency:number(rec.frequency),state:'unknown'});
+  }
+  return rows.sort((a,b)=>a.km-b.km);
+}
+function recoveredRecords(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (payload && typeof payload==='object') return Object.values(payload).flatMap(v=>Array.isArray(v)?v:[v]);
+  throw Error('Ismeretlen SondeHub megtalálási adat-formátum.');
+}
+async function applyRecoveries(rows) {
+  // A /recovered API dokumentáltan támogatja a vesszővel elválasztott sorozatszámokat és last=0-t.
+  const byId=new Map(rows.map(r=>[r.serial, r]));
+  const batches=[];
+  for (let i=0;i<rows.length;i+=25) batches.push(rows.slice(i,i+25));
+  let failures=0;
+  // A legfeljebb 3 párhuzamos kérés kevésbé terheli a SondeHubot.
+  let next=0;
+  async function worker() {
+    while(next<batches.length) {
+      const group=batches[next++], serials=group.map(r=>r.serial);
+      try {
+        const q=new URLSearchParams({serial:serials.join(','),last:'0'});
+        const reports=recoveredRecords(await apiJSON(API+'/recovered?'+q));
+        for (const row of group)row.state='none';
+        for (const rep of reports) {
+          const item=byId.get(String(rep?.serial||''));
+          if (!item)continue;
+          if(rep.recovered===true)item.state='recovered';
+          else if(rep.recovered===false&&item.state!=='recovered')item.state='failed';
+        }
+      } catch(error) {
+        failures++;
+        console.warn('Recovery státusz lekérdezése nem sikerült:',error.message);
+      }
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(3,batches.length)},()=>worker()));
+  return failures;
+}
+function drawResults(rows, allCount, failed) {
+  const visible=rows.filter(row=>!($('hideFound').checked&&row.state==='recovered'));
+  $('total').textContent=String(allCount);
+  $('shown').textContent=String(visible.length);
+  $('recoveredCount').textContent=String(rows.filter(row=>row.state==='recovered').length)+(failed?'*':'');
+  $('filterHint').textContent=visible.length+' találat · '+(failed?'részben ellenőrizetlen':'SondeHub státuszokkal');
+  $('updated').textContent='Lekérve: '+new Date().toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit'});
+  if (layer) layer.clearLayers();
+  if (!visible.length) {$('list').innerHTML='<div class="empty">Nem érkezett a beállított feltételeknek megfelelő találat.<br>Ez nem bizonyítja, hogy nincs kereshető szonda a környéken.</div>';return;}
+  $('list').innerHTML=visible.map((s,i)=>{
+    const tag=s.state==='recovered'?'Bejelentetten megtalált':s.state==='failed'?'Sikertelen keresés jelentve':s.state==='none'?'Nincs SondeHub-bejelentés':'Állapot nem ellenőrzött';
+    const cls=(s.state==='unknown'||s.state==='failed')?'warn':s.state==='recovered'?'found':'';
+    const go='https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lon;
+    const card='https://sondehub.org/'+encodeURIComponent(s.serial);
+    return `<article class="item"><div><h3>${safe(s.serial)}<span class="pill ${cls}">${safe(tag)}</span></h3><div class="meta">${fmtDate(s.datetime)} · ${safe(s.type||'ismeretlen típus')}<br>Utolsó magasság: ${s.alt===null?'?':Math.round(s.alt)+' m'} · ${s.frequency===null?'Frekvencia ismeretlen':s.frequency.toFixed(3)+' MHz'}<br>${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}</div><div class="links"><a href="${go}" target="_blank" rel="noopener">Navigáció</a><a href="${card}" target="_blank" rel="noopener">SondeHub adatlap</a><a href="#map" data-focus="${i}">Térképen</a></div></div><div class="distance">${s.km.toFixed(1)} <small>km</small></div></article>`;
+  }).join('');
+  if (!map||!layer)return;
+  for(const s of visible) {
+    const color=s.state==='recovered'?'#9babbc':s.state==='unknown'?'#ffce85':'#68e0c1';
+    const marker=L.circleMarker([s.lat,s.lon],{radius:7,color:'#0e2439',weight:2,fillColor:color,fillOpacity:1}).addTo(layer);
+    const go='https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lon;
+    marker.bindPopup(`<b>${safe(s.serial)}</b><br>${s.km.toFixed(1)} km · ${s.alt===null?'?':Math.round(s.alt)+' m'}<br>${fmtDate(s.datetime)}<br><a href="${go}" target="_blank" rel="noopener">Navigáció</a>`);
+    s.marker=marker;
+  }
+  $('list').querySelectorAll('[data-focus]').forEach(a=>a.addEventListener('click',event=>{
+    event.preventDefault();const idx=Number(a.dataset.focus),r=visible[idx];if(map&&r?.marker){map.setView([r.lat,r.lon],13);r.marker.openPopup();document.querySelector('#map').scrollIntoView({behavior:'smooth',block:'center'});}
+  }));
+}
+async function search() {
+  if(busy)return;
+  if (isLocalFile) {setStatus('Ezt az oldalt most file:// módban futtatod. Töltsd fel a webszerveredre, és a HTTP vagy HTTPS webcímen próbáld. A GPS csak HTTPS alatt működik.','error');return;}
+  const lat=Number($('lat').value),lon=Number($('lon').value),radius=Number($('radius').value),maxAlt=Number($('maxAlt').value);
+  if(!$('lat').value||!$('lon').value||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180){setStatus('Adj meg érvényes koordinátákat.','error');return;}
+  let range;try{range=dateRange();}catch(error){setStatus(error.message,'error');return;}
+  const now=new Date(),seconds=Math.max(3600,Math.ceil((now-range.start)/1000));
+  const old=seconds>7*86400;
+  if(old){setStatus('A SondeHub élő API-ja csak a legutóbbi 7 nap kereséséhez alkalmas.','error');return;}
+  busy=true;$('search').disabled=true;$('search').textContent='Lekérdezés folyamatban…';
+  setStatus('SondeHub szondalistájának lekérése…'+(old?'\nRégebbi időszaknál a SondeHub élő API-ja hiányos lehet.':''));
+  try {
+    drawCenter(lat,lon,radius,true);
+    const q=new URLSearchParams({lat:String(lat),lon:String(lon),distance:String(radius*1000),last:String(seconds)});
+    const payload=await apiJSON(API+'/sondes?'+q);
+    const rows=parsedTelemetry(payload,lat,lon,radius,range.start,range.end,maxAlt);
+    setStatus(rows.length?rows.length+' szonda. Megtalálási bejelentések ellenőrzése…':'Nem érkezett megfelelő észlelés.');
+    const failures=await applyRecoveries(rows);
+    lastRows=rows;drawResults(rows,rows.length,failures);
+    const out=rows.filter(r=>!($('hideFound').checked&&r.state==='recovered')).length;
+    let msg=`${out} megjelenített találat a SondeHubtól.`;
+    if(failures)msg+='\n⚠️ Egyes megtalálási állapotok nem ellenőrizhetők; ezeket külön jelöljük.';
+    msg+='\nℹ️ Az eredmény csak a SondeHub élő adatbázisának megfigyeléseit tartalmazza.';
+    if(range.end<new Date(Date.now()-86400000))msg+='\n⚠️ Régi záródátumnál egyes, később is észlelt szondák kimaradhatnak.';
+    setStatus(msg,failures||old?'warning':'good');
+  } catch(error) {
+    console.error(error);
+    setStatus(error.message+'\nPróbáld rövidebb időszakkal (1–7 nap). Ha CORS-hiba jelentkezik, azt pusztán egy HTML-fájlból nem lehet biztosan megkerülni.','error');
+    lastRows=[];$('total').textContent='–';$('shown').textContent='–';$('recoveredCount').textContent='–';$('list').innerHTML='<div class="empty">A lekérdezés nem sikerült. Nem jelenítünk meg régi vagy mintatalálatokat.</div>';if(layer)layer.clearLayers();
+  } finally {busy=false;$('search').disabled=false;$('search').textContent='🔎 Szondák keresése';}
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  setupMap();
+  if(isLocalFile){$('localAlert').hidden=false;setStatus('A HTML-fájl helyileg megnyílt. A működő online keresés tesztjéhez nyisd meg a webszervereden (HTTP vagy HTTPS).','warning');}
+  $('start').value=dayStr(new Date(Date.now()-7*86400000));$('end').value=dayStr(new Date());
+  $('period').addEventListener('change',()=>{$('dateRow').hidden=$('period').value!=='custom';});
+  $('search').addEventListener('click',search);
+  $('hideFound').addEventListener('change',()=>{if(lastRows.length)drawResults(lastRows,lastRows.length,lastRows.some(r=>r.state==='unknown'));});
+  $('tata').addEventListener('click',()=>{setCoords(47.6513,18.3183);setStatus('Tata a keresés középpontja.');});
+  $('gps').addEventListener('click',()=>{
+    if(!navigator.geolocation){setStatus('A böngésző nem támogatja a helymeghatározást.','error');return;}
+    setStatus('GPS-helyzet lekérése…');navigator.geolocation.getCurrentPosition(pos=>{
+      setCoords(pos.coords.latitude,pos.coords.longitude);setStatus('Helyzet sikeresen meghatározva. Indíthatod a keresést.','good');
+    },error=>setStatus('Nem sikerült a helymeghatározás: '+error.message+'. Megadhatod a koordinátákat kézzel.','warning'),{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+  });
+});
+</script>
+</body>
+</html>
