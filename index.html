@@ -44,7 +44,7 @@
   <div id="localAlert" class="alert" hidden><strong>⚠️ Helyi fájlként nyitottad meg az oldalt</strong>A SondeHub-lekérdezéshez webszerverről nyisd meg a fájlt (HTTP is jó). A böngészős GPS-hez viszont HTTPS szükséges. A <code>file://</code> cím nem alkalmas a megbízható online teszteléshez.</div>
   <div class="grid">
     <section class="box controls" aria-label="Keresési beállítások">
-      <div class="field wide"><label>Helyzet</label><div class="buttons"><button id="gps" type="button">📍 Saját helyzet</button><button id="tata" type="button">Tata</button></div><p class="hint">GPS csak HTTPS-es oldalon vagy localhoston érhető el.</p></div>
+      <div class="field wide"><label>Helyzet</label><div class="buttons"><button id="gps" type="button">📍 Saját helyzet</button></div><p class="hint">GPS csak HTTPS-es oldalon vagy localhoston érhető el.</p></div>
       <div class="two wide">
         <div class="field"><label for="lat">Szélesség</label><input id="lat" type="number" value="47.6513" min="-90" max="90" step="any"></div>
         <div class="field"><label for="lon">Hosszúság</label><input id="lon" type="number" value="18.3183" min="-180" max="180" step="any"></div>
@@ -267,7 +267,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   $('period').addEventListener('change',()=>{$('dateRow').hidden=$('period').value!=='custom';});
   $('search').addEventListener('click',search);
   $('hideFound').addEventListener('change',()=>{if(lastRows.length)drawResults(lastRows,lastRows.length,lastRows.some(r=>r.state==='unknown'));});
-  $('tata').addEventListener('click',()=>{setCoords(47.6513,18.3183);setStatus('Tata a keresés középpontja.');});
   $('gps').addEventListener('click',()=>{
     if(!navigator.geolocation){setStatus('A böngésző nem támogatja a helymeghatározást.','error');return;}
     setStatus('GPS-helyzet lekérése…');navigator.geolocation.getCurrentPosition(pos=>{
